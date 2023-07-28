@@ -28,7 +28,7 @@ public class GetMinPriceTest {
     }
 
     @Test
-    public void testGetQuantity() {
+    public void testGetMinPrice() {
         assertEquals(expected, LabelUtils.getMinPrice(originalPrice, discount));
 
         String format = "pass %s expected:%.0f actual:%.0f";

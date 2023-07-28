@@ -15,16 +15,21 @@ import java.util.*;
 @Service
 public class GroupBuyServiceImpl implements GroupBuyService {
 
-    private Map<String, String> methodMap = new HashMap<>();  // 中文列名与对应英文get方法名的映射
-    private Set<String> colValueSet = new HashSet<>();  // 所选列的所有属性值的集合
+    private Map<String, String> methodMap ;  // 中文列名与对应英文get方法名的映射
+    private Set<String> colValueSet;  // 所选列的所有属性值的集合
 
-    private List<GroupBuyData> entireExcel = new ArrayList<>();
+    private List<GroupBuyData> entireExcel;  // 传入的Excel文件
+
+    public GroupBuyServiceImpl() {
+        initMethodMap();  // 默认初始化一次methodMap
+    }
+
     @Override
     public void splitExcel(GroupBuyDataListener groupBuyDataListener, String colName, HttpServletResponse response) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
-        entireExcel = groupBuyDataListener.getList();  // 传入的Excel文件
+        entireExcel = groupBuyDataListener.getList();
 
-        initMethodMap();
         initColValueSet(colName);
+
         Map<String, List<GroupBuyData>> splitedExcel = getSplitedExcel(colName);
 
         //压缩已分组的Excel
@@ -35,6 +40,7 @@ public class GroupBuyServiceImpl implements GroupBuyService {
      * 初始化列名与对应get方法的映射
      */
     private void initMethodMap() {
+        methodMap = new HashMap<>();
         methodMap.put("查价时间", "getSearchTime");
         methodMap.put("平台名称", "getPlatform");
         methodMap.put("大区", "getProvince");
@@ -56,6 +62,7 @@ public class GroupBuyServiceImpl implements GroupBuyService {
      * @throws IllegalAccessException
      */
     private void initColValueSet(String colName) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        colValueSet = new HashSet<>(); ;  // 更新colValueSet，避免重复调用接口致使colValueSet不正确
         Class clazz = Class.forName("com.boxiaotong.exam.pojo.GroupBuyData");  // 获取实体类
         Method method = clazz.getMethod(methodMap.get(colName), null);  // 根据列名获取方法
 
@@ -94,6 +101,7 @@ public class GroupBuyServiceImpl implements GroupBuyService {
             String colValue = (String)method.invoke(entireExcel.get(i), null);
             splitedExcel.get(colValue + ".xls").add(entireExcel.get(i));  // 根据列属性值添加到对应Excel中
         }
+        System.out.println(splitedExcel.size());
         return splitedExcel;
     }
 }

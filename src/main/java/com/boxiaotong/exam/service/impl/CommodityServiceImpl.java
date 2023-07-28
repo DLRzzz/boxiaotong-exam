@@ -24,7 +24,6 @@ public class CommodityServiceImpl implements CommodityService {
         initHeadList(noModelDataListener);
         initSplitedSku(noModelDataListener);
 
-
         // 这里需要设置不关闭流
         EasyExcel.write(response.getOutputStream()).head(headList)
                 .autoCloseStream(Boolean.FALSE).sheet("")

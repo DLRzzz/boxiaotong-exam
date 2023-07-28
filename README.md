@@ -24,7 +24,7 @@
 
 #### 按列拆分成多个Excel
 
-1. 按列拆分表（注：因为原Excel中存在“null”字符，致使后端实体类GroupBuy的Double属性无法识别，所以笔者**将原Excel中存在“null”字符替换为null再进行测试**）
+1. 按列拆分表（注：因为原Excel中存在“null”字符，致使后端实体类GroupBuy的Double属性无法识别，所以笔者**将原Excel中所有的“null”字符替换为null再进行测试**）
    
    测试结果：
    
