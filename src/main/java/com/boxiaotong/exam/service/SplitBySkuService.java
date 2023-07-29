@@ -5,6 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-public interface CommodityService {
-    void skuSplit(NoModelDataListener noModelDataListener,  HttpServletResponse response) throws IOException;
+public interface SplitBySkuService {
+    void splitBySku(NoModelDataListener noModelDataListener,  HttpServletResponse response) throws IOException;
 }

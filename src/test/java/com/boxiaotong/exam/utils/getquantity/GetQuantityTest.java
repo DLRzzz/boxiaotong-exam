@@ -5,11 +5,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.Closeable;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
@@ -18,7 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class GetQuantityTest {
     private int expected;
     private String str;
-    private static String fileName = "src/test/java/com/boxiaotong/exam/utils/getquantity/quantity_input.txt";
+    private static final String fileName = "src/test/java/com/boxiaotong/exam/utils/getquantity/quantity_input.txt";
 
     public GetQuantityTest(String str, String expected) {
         this.str = str;
@@ -34,34 +32,8 @@ public class GetQuantityTest {
     }
 
     @Parameterized.Parameters
-    public static List<String[]> readLines() {
-        List<String[]> content = new ArrayList<String[]>();
-
-        FileReader fr = null;
-        try {
-            fr = new FileReader(fileName);
-            LineNumberReader lr = new LineNumberReader(fr);
-            String line = "";
-            while((line = lr.readLine()) != null) {
-                String[] tmp = line.split(" ==> ");
-                content.add(tmp);
-            }
-            lr.close();
-        } catch(IOException e) {
-            e.printStackTrace();
-        } finally {
-            close(fr);
-        }
-        return content;
-    }
-
-    public static void close(Closeable inout) {
-        if(inout != null) {
-            try {
-                inout.close();
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public static List<String[]> readLines() throws IOException {
+        var lines = Files.readAllLines(Path.of(fileName));
+        return lines.stream().map(line -> line.split(" ==> ")).toList();
     }
 }

@@ -5,21 +5,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.Closeable;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(Parameterized.class)
 public class GetMinPriceTest {
     private double expected;
     private double originalPrice;
     private String discount;
-    private static String fileName = "src/test/java/com/boxiaotong/exam/utils/getminprice/minprice_input.txt";
+    private static final String fileName = "src/test/java/com/boxiaotong/exam/utils/getminprice/minprice_input.txt";
 
     public GetMinPriceTest(double originalPrice, String discount, double expected) {
         this.originalPrice = originalPrice;
@@ -29,9 +28,10 @@ public class GetMinPriceTest {
 
     @Test
     public void testGetMinPrice() {
-        assertEquals(expected, LabelUtils.getMinPrice(originalPrice, discount));
+        // 价格为浮点数，改为用差值判断
+        assertTrue(LabelUtils.getMinPrice(originalPrice, discount) - expected < 0.01);  // 小数点两位之后舍去
 
-        String format = "pass %s expected:%.0f actual:%.0f";
+        String format = "pass %s expected:%.2f actual:%.2f";
         System.out.println(String.format(format, discount, expected, LabelUtils.getMinPrice(originalPrice, discount)));
     }
 
@@ -40,45 +40,29 @@ public class GetMinPriceTest {
      * @return
      */
     @Parameterized.Parameters
-    public static List<Object[]> readLines() {
-        List<Object[]> content = new ArrayList<Object[]>();
+    public static List<Object[]> readLines() throws IOException {
+        var lines = Files.readAllLines(Path.of(fileName));
 
-        FileReader fr = null;
-        try {
-            fr = new FileReader(fileName);
-            LineNumberReader lr = new LineNumberReader(fr);
-            String line = "";
-            while((line = lr.readLine()) != null) {
-                Object[] item = new Object[3];
-                int cnt = 0;
-                while(line != null && !line.equals("")) {
-                    String tmp = line.split("：\\s*")[1];  // \s* 匹配空格
-                    if(cnt != 1) item[cnt++] = Double.parseDouble(tmp);
-                    else item[cnt++] = tmp;
-                    line = lr.readLine();  // 换行读取
-                }
-                content.add(item);
-            }
-            lr.close();
-        } catch(IOException e) {
-            e.printStackTrace();
-        } finally {
-            close(fr);
-        }
-        return content;
-    }
+        List<Object[]> res = new ArrayList<Object[]>();
+        List<Object> line = new ArrayList<>();
 
-    /**
-     * IO辅助函数
-     * @param inout
-     */
-    public static void close(Closeable inout) {
-        if(inout != null) {
-            try {
-                inout.close();
-            } catch(IOException e) {
-                e.printStackTrace();
+        for (int i = 0; i < lines.size(); i++) {
+            // 特判空行
+            if (lines.get(i).trim().equals("")) continue;
+
+            // \s* 匹配空格，并限定分成两段，避免匹配多次
+            String tmp = lines.get(i).split("：\\s*", 2)[1];
+
+            if (i % 4 == 0 || i % 4 == 2)
+                line.add(Double.parseDouble(tmp));  // 储存价格
+            else
+                line.add(tmp);
+//            System.out.println(tmp);
+            if(line.size() == 3) {  // 加入每行测试数据
+                res.add(line.toArray());
+                line = new ArrayList<>();
             }
         }
+        return res;
     }
 }

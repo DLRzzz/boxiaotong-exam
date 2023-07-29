@@ -49,7 +49,8 @@ public class LabelUtils {
      */
     public static Double getMinPrice(Double originalPrice, String discount) {
         Double minPrice = originalPrice;  // 最优解初始化为页面价格
-        Map<Integer, Integer> discountMap = new LinkedHashMap<>();  // 构建 满->减 优惠映射
+        // 构建 满->max(减) 优惠映射
+        Map<Integer, Integer> discountMap = new LinkedHashMap<>();
         for(int i = 0, j = 0; i < discount.length(); i++) {
             if(discount.charAt(i) == '满') {
                 j = i + 1;
@@ -71,7 +72,11 @@ public class LabelUtils {
                 }
 //                 System.out.println(Integer.parseInt(value.toString()));
                 int t1 = Integer.parseInt(key.toString()), t2 = Integer.parseInt(value.toString());
-                discountMap.put(t1, t2);  // 加入当前满减信息
+                if(discountMap.containsKey(t1)) {
+                    discountMap.put(t1, Math.max(t2, discountMap.get(t1)));
+                }
+                else
+                    discountMap.put(t1, t2);  // 加入当前满减信息
             }
         }
 
@@ -90,12 +95,10 @@ public class LabelUtils {
                 curPrice += originalPrice;
                 cnt++;
             }
-
             curPrice = (curPrice - value) / cnt;
             minPrice = Math.min(minPrice, curPrice);  // 更新最优解
         }
-        // System.out.println("当前最优解：" + minPrice);
-
+//        System.out.println("当前最优解：" + minPrice);
         return minPrice;
     }
 }
