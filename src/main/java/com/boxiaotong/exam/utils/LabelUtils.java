@@ -86,12 +86,11 @@ public class LabelUtils {
                 }
 
                 int t1 = Integer.parseInt(key.toString()), t2 = Integer.parseInt(value.toString());
-                if(discountMap.containsKey(t1)) {
-                    discountMap.put(t1, Math.max(t2, discountMap.get(t1)));
-                }
-                else
-                    discountMap.put(t1, t2);  // 加入当前满减信息
+    
+                discountMap.compute(t1, (k, v) -> v == null ? t2 : Math.max(v, t2));  // 更新当前满减信息
             }
+
+
         }
 
         for (Map.Entry<Integer, Integer> entry : discountMap.entrySet()) {  // 遍历所有满减优惠，更新最优解
