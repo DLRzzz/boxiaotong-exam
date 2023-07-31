@@ -1,5 +1,8 @@
 package com.boxiaotong.exam.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boxiaotong.exam.mapper.BrandMapMapper;
 import com.boxiaotong.exam.mapper.GoodsMapper;
 import com.boxiaotong.exam.pojo.BrandMap;
@@ -23,25 +26,38 @@ public class GoodServiceImpl implements GoodsService {
     @Autowired
     private BrandMapMapper brandMapMapper;
 
-    public boolean batchUpdateSeries(List idList) {
-        List<Goods> goodsList = goodsMapper.selectBatchIds(idList);  // 分批获取商品信息
+    public void updateAllSeries() {
+
+        int pageId = 1;  // 当前页数
+        int pageSize = 5;  // 页面大小
 
         List<BrandMap> mappingDict = brandMapMapper.selectList(null); // 得到所有brand映射
 
-        List<Goods> updatedGoodsList = new ArrayList<>();  // 储存更新后的goodList
+        while (true) {
+            IPage<Goods> goodsIPage = new Page<>(pageId, pageSize);
+            QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
+            queryWrapper.orderByAsc("id");
+            // 将record按照ID升序排序，并返回第page页的内容
+            List<Goods> goodsList = goodsMapper.selectPage(goodsIPage, queryWrapper).getRecords();
 
-        for (int i = 0; i < goodsList.size(); i++) {
-            Integer id = goodsList.get(i).getId();
-            String brand = goodsList.get(i).getBrand();
-            String name = goodsList.get(i).getName();
+            if (goodsList.size() == 0) break;
+            else pageId ++;
 
-            String series = LabelUtils.getSeriesLabel(brand, name, mappingDict);
+            List<Goods> updatedGoodsList = new ArrayList<>();  // 储存更新后的goodList
 
-            Goods goods = new Goods(id, brand, name, series);
+            for (int i = 0; i < goodsList.size(); i++) {
+                Integer id = goodsList.get(i).getId();
+                String brand = goodsList.get(i).getBrand();
+                String name = goodsList.get(i).getName();
 
-            updatedGoodsList.add(goods);
+                String series = LabelUtils.getSeriesLabel(brand, name, mappingDict);
+
+                Goods goods = new Goods(id, brand, name, series);
+
+                updatedGoodsList.add(goods);
+            }
+            goodsMapper.updateAllSeries(updatedGoodsList);
         }
-        return goodsMapper.batchUpdateSeries(updatedGoodsList);
     }
 
 }

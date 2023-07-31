@@ -4,7 +4,6 @@ import com.boxiaotong.exam.mapper.BrandMapMapper;
 import com.boxiaotong.exam.pojo.BrandMap;
 import com.boxiaotong.exam.service.GoodsService;
 import com.boxiaotong.exam.utils.LabelUtils;
-import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class getSeriesLabelTest {
     public void test() {
         List<BrandMap> mappingDict = brandMapMapper.selectList(null); // 得到所有brand映射
 
-        TestCase.assertEquals("其他", LabelUtils.getSeriesLabel("其他", "菠萝啤整箱装 24罐*320ml零酒精果啤果味汽水碳酸饮料夏日饮品" ,mappingDict));
+        assertEquals("其他", LabelUtils.getSeriesLabel("其他", "菠萝啤整箱装 24罐*320ml零酒精果啤果味汽水碳酸饮料夏日饮品" ,mappingDict));
         assertEquals("清爽", LabelUtils.getSeriesLabel("雪花", "SNOW雪花纯生啤酒8度500ml*12罐匠心营造易拉罐装整箱黄啤酒 500mL*12瓶" ,mappingDict));
         assertEquals("清爽", LabelUtils.getSeriesLabel("雪花", "雪花啤酒8°清爽啤酒330ml*24听 罐装整箱麦芽酿制 武汉满百包邮" ,mappingDict));
         assertEquals("淡爽", LabelUtils.getSeriesLabel("雪花", "雪花（SNOW）啤酒  淡爽  500ml*12听  整箱装  送礼自饮佳品" ,mappingDict));
@@ -39,6 +38,7 @@ public class getSeriesLabelTest {
 
     @Test
     public void testBatchUpdateSeries() {
-        goodsService.batchUpdateSeries(List.of(1, 2, 3, 4, 5, 6, 7));
+
+        goodsService.updateAllSeries();
     }
 }

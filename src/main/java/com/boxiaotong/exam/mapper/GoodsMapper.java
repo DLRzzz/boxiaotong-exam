@@ -10,5 +10,5 @@ import java.util.List;
 @Mapper
 public interface GoodsMapper extends BaseMapper<Goods> {
 
-    boolean batchUpdateSeries(@Param("goodsList") List<Goods> goodsList);
+    boolean updateAllSeries(@Param("goodsList") List<Goods> goodsList);
 }
