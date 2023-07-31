@@ -6,7 +6,6 @@ import com.boxiaotong.exam.service.SplitBySkuService;
 import com.boxiaotong.exam.utils.NoModelDataListener;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,7 +40,7 @@ public class SplitExcelController {
     }
 
 
-    @GetMapping("/skuSplit")
+    @PostMapping("/skuSplit")
     public void splitBySku(@RequestParam("file") MultipartFile file, HttpServletResponse response) throws IOException {
         // 获取Excel文件内容
         NoModelDataListener noModelDataListener = new NoModelDataListener();
