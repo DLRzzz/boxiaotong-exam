@@ -26,6 +26,7 @@ public class SplitBySkuServiceImpl implements SplitBySkuService {
 
         EasyExcel.write(response.getOutputStream()).head(updatedHeadList)
                 .sheet("").doWrite(splitSheet);
+
     }
 
     /**
@@ -73,7 +74,6 @@ public class SplitBySkuServiceImpl implements SplitBySkuService {
                 List<Object> splitLine = new ArrayList<>();  // 按照字段名排序的excel行
 
                 for (int k = 0; k < headList.size(); k++) {  // 按照表头顺序构造每行
-                    System.out.println(k);
                     if (k == skuColIndex) {
                         splitLine.add(skuJsonList.get(j).getSku_id());
                         splitLine.add(skuJsonList.get(j).getSku_name());

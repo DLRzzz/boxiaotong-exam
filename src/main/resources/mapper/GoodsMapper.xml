@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boxiaotong.exam.mapper.GoodsMapper">
+
+    <update id="batchUpdateSeries" parameterType="java.util.List">
+        <foreach collection="goodsList" item="item" index="index" open="" close="" separator=";">
+            update goods set series = #{item.series} where id = #{item.id}
+        </foreach>
+    </update>
+
+
+</mapper>

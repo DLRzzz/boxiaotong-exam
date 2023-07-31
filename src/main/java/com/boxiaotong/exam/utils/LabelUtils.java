@@ -1,13 +1,26 @@
 package com.boxiaotong.exam.utils;
 
+import com.boxiaotong.exam.mapper.BrandMapMapper;
+import com.boxiaotong.exam.pojo.BrandMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
 public class LabelUtils {
+
+    public static BrandMapMapper brandMapMapper;
+
+    // 使用set方法注入mapper
+    @Autowired
+    public void setBrandMapMapper(BrandMapMapper brandMapMapper) {
+        LabelUtils.brandMapMapper = brandMapMapper;
+    }
 
     /**
      * 从商品名称中提取单量
@@ -27,8 +40,7 @@ public class LabelUtils {
             int start = matcher.start();
             int end = matcher.end();
             String res;
-            if (tmp.matches("\\d*\\.*\\d+l") || tmp.matches("\\d*\\.*\\d+L")
-                    || tmp.matches("\\d*\\.*\\d+升")) {
+            if (tmp.matches("\\d*\\.*\\d+(l|L|升)")) {
                 res = str.substring(start, end - 1);
                 return (int)(Double.parseDouble(res) * 1000);
             } else {
@@ -60,9 +72,11 @@ public class LabelUtils {
                     key.append(c);
                     j++;
                 }
-                // System.out.println(Integer.parseInt(key.toString()));
 
-                while(discount.charAt(j) != '减') j++;  // 找到 减 的位置
+                while(j < discount.length() && discount.charAt(j) != '减') j++;  // 找到 减 的位置
+
+                if(j >= discount.length()) break;  // 找到 满 ，而未找到对应的 减
+
                 j += 1;
                 StringBuilder value = new StringBuilder();
                 while(j < discount.length() && Character.isDigit(discount.charAt(j))) {
@@ -70,7 +84,7 @@ public class LabelUtils {
                     value.append(c);
                     j++;
                 }
-//                 System.out.println(Integer.parseInt(value.toString()));
+
                 int t1 = Integer.parseInt(key.toString()), t2 = Integer.parseInt(value.toString());
                 if(discountMap.containsKey(t1)) {
                     discountMap.put(t1, Math.max(t2, discountMap.get(t1)));
@@ -80,14 +94,9 @@ public class LabelUtils {
             }
         }
 
-        Set<Map.Entry<Integer, Integer>> discountset = discountMap.entrySet();
-        Iterator<Map.Entry<Integer, Integer>> iterator = discountset.iterator();
-
-        while(iterator.hasNext()) {  // 遍历所有满减优惠，更新最优解
-
-            Map.Entry<Integer, Integer> entry = iterator.next();
-            int key = (Integer) entry.getKey();  // 满
-            int value = (Integer) entry.getValue();  // 减
+        for (Map.Entry<Integer, Integer> entry : discountMap.entrySet()) {  // 遍历所有满减优惠，更新最优解
+            int key = entry.getKey();
+            Integer value = entry.getValue();
 
             int cnt = 1;  // 购买商品件数
             double curPrice = originalPrice;  // 当前单件商品价格
@@ -100,5 +109,38 @@ public class LabelUtils {
         }
 //        System.out.println("当前最优解：" + minPrice);
         return minPrice;
+    }
+
+    /**
+     * 根据商品品牌、名称查询商品系列
+     * @param brand
+     * @param name
+     * @param mappingDict 所有的brand映射规则
+     * @return
+     */
+
+    public static String getSeriesLabel(String brand, String name, List<BrandMap> mappingDict) {
+        if ("其他".equals(brand)) return "其他";
+
+        for (int i = 0; i < mappingDict.size(); i++) {
+
+            String series = mappingDict.get(i).getSeries();
+
+            String firstKey = mappingDict.get(i).getFirstKey();
+            String secondKey = mappingDict.get(i).getSecondKey();
+            String thirdKey = mappingDict.get(i).getThirdKey();
+            String fourthKey = mappingDict.get(i).getFourthKey();
+
+            if (!"".equals(firstKey) && name.contains(firstKey)) {  // 匹配第一关键字
+                return series;
+            } else if(null != secondKey && name.contains(secondKey) &&
+                    (null == thirdKey || null != thirdKey && name.contains(thirdKey)) &&
+                    (null == fourthKey || null != fourthKey && name.contains(fourthKey))) {
+                // 第二、三、四个关键字至少存在一个，且非null的话需要均匹配上
+                // null用 == 判断
+                return series;
+            }
+        }
+        return brand + "其他";
     }
 }
